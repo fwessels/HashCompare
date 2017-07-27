@@ -1,19 +1,37 @@
+/*
+ * Minio Cloud Storage, (C) 2017 Minio, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package main
 
 import (
 	"container/heap"
 	"encoding/hex"
 	"fmt"
-	"github.com/aead/siphash"
 	"github.com/aead/poly1305"
-	"github.com/minio/blake2b-simd"
+	"github.com/aead/siphash"
 	"github.com/dgryski/go-highway"
+	"github.com/minio/blake2b-simd"
 	"math/big"
 	"math/rand"
+	"os"
 	"runtime"
 	"sort"
 	"strconv"
 	"sync"
+	"text/tabwriter"
 	"time"
 )
 
@@ -135,8 +153,9 @@ func TestHashPermutationsRange(msg []byte, key [32]byte, cpu int, cpuShift uint,
 	results <- keys
 }
 
-func TestHashPermutations(key [32]byte, msgSize uint, algo string) (permutations, equalBits int, elapsed time.Duration) {
+func TestHashPermutations(key [32]byte, msgSize uint, algo string) (permutations, zeroBits int, elapsed time.Duration) {
 	start := time.Now()
+	fmt.Println("Starting", start.Format("3:04PM"), "...")
 
 	msg := make([]byte, msgSize)
 	for i := range msg {
@@ -217,7 +236,7 @@ func TestHashPermutations(key [32]byte, msgSize uint, algo string) (permutations
 
 	elapsed = time.Since(start)
 	fmt.Println(smallest)
-	return len(keys)*len(keys[0]), 8*len(keys[0][0])-len(smallest.Text(2)), elapsed
+	return len(keys) * len(keys[0]), 8*len(keys[0][0]) - len(smallest.Text(2)), elapsed
 }
 
 // An HexHeap is a min-heap of hexadecimals.
@@ -253,15 +272,21 @@ func main() {
 		key[i] = byte(255 - i)
 	}
 
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, '-', tabwriter.AlignRight|tabwriter.Debug)
+	fmt.Fprintln(w, "Permutations", "\t", "Zero bits", "\t", "Duration")
+
 	algo := ""
 	//algo = "blake2b"
 	//algo = "blake2b-256"
 	//algo = "poly1305"
-	//algo = "siphash"
-	algo = "highwayhash"
-	for shift := uint(8); shift < 14; shift++ {
-		permutations, equalBits, elapsed := TestHashPermutations(key, 1<<shift, algo)
-		fmt.Printf("Permutations: %d -- equal bits: %d -- duration: %v (%s)\n", permutations, equalBits, elapsed, algo)
-
+	algo = "siphash"
+	//algo = "highwayhash"
+	for shift := uint(8); shift < 16; shift++ {
+		permutations, zeroBits, elapsed := TestHashPermutations(key, 1<<shift, algo)
+		fmt.Printf("Permutations: %d -- zero bits: %d -- duration: %v (%s)\n", permutations, zeroBits, elapsed, algo)
+		fmt.Fprintln(w, permutations, "\t", zeroBits, "\t", elapsed)
 	}
+	fmt.Println()
+	fmt.Println(algo)
+	w.Flush()
 }
