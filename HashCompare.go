@@ -33,6 +33,7 @@ import (
 	"sync"
 	"text/tabwriter"
 	"time"
+	"encoding/binary"
 )
 
 func Poly1305Sum(buf []byte, key [32]byte) []byte {
@@ -66,19 +67,11 @@ func SipHashSum(buf []byte, key [32]byte) []byte {
 	return sum
 }
 
-func PutUint(buf []byte, x uint64) int {
-	for i := 0; i < 8; i++ {
-		buf[i] = byte(x)
-		x >>= 8
-	}
-	return 8
-}
-
 func HighwayHash(buf []byte) []byte {
 	key := highway.Lanes{0x0706050403020100, 0x0F0E0D0C0B0A0908, 0x1716151413121110, 0x1F1E1D1C1B1A1918}
 	h := highway.Hash(key, buf[:])
 	b := make([]byte, 8)
-	PutUint(b, h)
+	binary.LittleEndian.PutUint64(b, h)
 	return b
 }
 
@@ -279,8 +272,8 @@ func main() {
 	//algo = "blake2b"
 	//algo = "blake2b-256"
 	//algo = "poly1305"
-	algo = "siphash"
-	//algo = "highwayhash"
+	//algo = "siphash"
+	algo = "highwayhash"
 	for shift := uint(8); shift < 16; shift++ {
 		permutations, zeroBits, elapsed := TestHashPermutations(key, 1<<shift, algo)
 		fmt.Printf("Permutations: %d -- zero bits: %d -- duration: %v (%s)\n", permutations, zeroBits, elapsed, algo)
