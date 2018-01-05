@@ -138,7 +138,7 @@ func TestHashPermutationsRange(msg []byte, key [32]byte, cpu int, cpuShift uint,
 				tag = Blake2b256Sum(msg)
 			case "siphash":
 				tag = SipHashSum(msg, key)
-			case "highwayhash":
+			case "highwayhash256":
 				tag = HighwayHash(msg, key)
 			case "highwayhash128":
 				tag = HighwayHash128(msg, key)
@@ -299,13 +299,12 @@ func permuteAlgorithm(algo string) {
 }
 
 func main() {
-	
-	//algo = "blake2b"
-	//algo = "blake2b-256"
-	//algo = "poly1305"
-	//algo = "siphash"
-	permuteAlgorithm("highwayhash")
+
+	//permuteAlgorithm("blake2b")
+	//permuteAlgorithm("blake2b-256")
+	//permuteAlgorithm("poly1305")
+	//permuteAlgorithm("siphash")
+	permuteAlgorithm("highwayhash256")
 	permuteAlgorithm("highwayhash128")
-	//algo = "highwayhash128"
-	//algo = "highwayhash64"
+	//permuteAlgorithm("highwayhash64")
 }

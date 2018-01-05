@@ -6,7 +6,7 @@ At [minio](github.com/minio/minio) we use a hash algorithm in order to detect bi
 
 Initially we looked into [SipHash](https://131002.net/siphash/) as well as [Poly1305](https://cr.yp.to/mac.html). Obviously Poly1305 is not a "traditional" hash function but since it has nice performance properties and could potentially fit our use case (if used in a particular way), we decided to test it out as well.
 
-As a last algorithm we have analysed [HighwayHash](https://arxiv.org/pdf/1612.06257.pdf) which has been finalized as of January 2018. It can produce checksums in 64, 128, or 256 bit sizes and significantly outperforms other hashing techniques allowing for speeds over 10GB/sec on a single core (as compared to just roughly 1 GB/sec on a single core for Blake2b). We have developed a [Golang implementation](https://github.com/minio/highwayhash) with accelerations for both Intel and ARM.
+As a last algorithm we have analysed [HighwayHash](https://arxiv.org/pdf/1612.06257.pdf) which has been finalized as of January 2018. It can produce checksums in 64, 128, or 256 bit sizes and significantly outperforms other hashing techniques allowing for speeds over 10GB/sec on a single core (as compared to roughly 1 GB/sec on a single core for Blake2b). We have developed a [Golang implementation](https://github.com/minio/highwayhash) with accelerations for both Intel and ARM.
 
 ## Bit rot simulation
 
