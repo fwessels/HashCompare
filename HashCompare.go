@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"github.com/aead/poly1305"
 	"github.com/aead/siphash"
-	"github.com/dgryski/go-highway"
 	"github.com/minio/blake2b-simd"
+	"github.com/minio/highwayhash"
 	"math/big"
 	"math/rand"
 	"os"
@@ -33,7 +33,6 @@ import (
 	"sync"
 	"text/tabwriter"
 	"time"
-	"encoding/binary"
 )
 
 func Poly1305Sum(buf []byte, key [32]byte) []byte {
@@ -67,12 +66,28 @@ func SipHashSum(buf []byte, key [32]byte) []byte {
 	return sum
 }
 
-func HighwayHash(buf []byte) []byte {
-	key := highway.Lanes{0x0706050403020100, 0x0F0E0D0C0B0A0908, 0x1716151413121110, 0x1F1E1D1C1B1A1918}
-	h := highway.Hash(key, buf[:])
-	b := make([]byte, 8)
-	binary.LittleEndian.PutUint64(b, h)
-	return b
+func HighwayHash(buf []byte, key [32]byte) []byte {
+	h, _ := highwayhash.New(key[:])
+	h.Reset()
+	h.Write(buf[:])
+	sum := h.Sum(nil)
+	return sum
+}
+
+func HighwayHash128(buf []byte, key [32]byte) []byte {
+	h, _ := highwayhash.New128(key[:])
+	h.Reset()
+	h.Write(buf[:])
+	sum := h.Sum(nil)
+	return sum
+}
+
+func HighwayHash64(buf []byte, key [32]byte) []byte {
+	h, _ := highwayhash.New64(key[:])
+	h.Reset()
+	h.Write(buf[:])
+	sum := h.Sum(nil)
+	return sum
 }
 
 func mask(b, m int) byte {
@@ -124,7 +139,11 @@ func TestHashPermutationsRange(msg []byte, key [32]byte, cpu int, cpuShift uint,
 			case "siphash":
 				tag = SipHashSum(msg, key)
 			case "highwayhash":
-				tag = HighwayHash(msg)
+				tag = HighwayHash(msg, key)
+			case "highwayhash128":
+				tag = HighwayHash128(msg, key)
+			case "highwayhash64":
+				tag = HighwayHash64(msg, key)
 			}
 
 			keys = append(keys, tag)
@@ -274,6 +293,8 @@ func main() {
 	//algo = "poly1305"
 	//algo = "siphash"
 	algo = "highwayhash"
+	//algo = "highwayhash128"
+	//algo = "highwayhash64"
 	for shift := uint(8); shift < 16; shift++ {
 		permutations, zeroBits, elapsed := TestHashPermutations(key, 1<<shift, algo)
 		fmt.Printf("Permutations: %d -- zero bits: %d -- duration: %v (%s)\n", permutations, zeroBits, elapsed, algo)
