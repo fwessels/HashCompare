@@ -53,31 +53,31 @@ func benchmarkHash(b *testing.B, hash func() hash.Hash) {
 	}
 }
 
-func BenchmarkComparisonHighwayHash(b *testing.B) {
+func BenchmarkHighwayHash(b *testing.B) {
 	benchmarkHashWithKey(b, highwayhash.New)
 }
 
-func BenchmarkComparisonSHA256_AVX512(b *testing.B) {
+func BenchmarkSHA256_AVX512(b *testing.B) {
 	benchmarkAvx512(b, 1*1024*1024)
 }
 
-func BenchmarkComparisonBlake2b(b *testing.B) {
+func BenchmarkBlake2b(b *testing.B) {
 	benchmarkHashWithKey(b, blake2b.New512)
 }
 
-func BenchmarkComparisonSHA1(b *testing.B) {
+func BenchmarkSHA1(b *testing.B) {
 	benchmarkHash(b, sha1.New)
 }
 
-func BenchmarkComparisonMD5(b *testing.B) {
+func BenchmarkMD5(b *testing.B) {
 	benchmarkHash(b, md5.New)
 }
 
-func BenchmarkComparisonSHA512(b *testing.B) {
+func BenchmarkSHA512(b *testing.B) {
 	benchmarkHash(b, sha512.New)
 }
 
-func BenchmarkComparisonSHA256(b *testing.B) {
+func BenchmarkSHA256(b *testing.B) {
 	benchmarkHash(b, sha256.New)
 }
 
