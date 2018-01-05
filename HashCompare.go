@@ -287,8 +287,8 @@ func permuteAlgorithm(algo string) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, '-', tabwriter.AlignRight|tabwriter.Debug)
 	fmt.Fprintln(w, "Permutations", "\t", "Zero bits", "\t", "Duration")
 
-	const honderFiftyMillionPermutations = 23
-	for shift := uint(8); shift < 16; shift++ {
+	const hundredFiftyMillionPermutations = 23
+	for shift := uint(8); shift < hundredFiftyMillionPermutations; shift++ {
 		permutations, zeroBits, elapsed := TestHashPermutations(key, 1<<shift, algo)
 		fmt.Printf("Permutations: %d -- zero bits: %d -- duration: %v (%s)\n", permutations, zeroBits, elapsed, algo)
 		fmt.Fprintln(w, permutations, "\t", zeroBits, "\t", elapsed)
