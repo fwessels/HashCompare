@@ -18,6 +18,7 @@ package main_test
 
 import (
 	"crypto/md5"
+	"crypto/rand"
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
@@ -28,27 +29,31 @@ import (
 	"testing"
 )
 
+const size = 5 * 1024 * 1024
+
 func benchmarkHashWithKey(b *testing.B, hash func(key []byte) (hash.Hash, error)) {
-	b.SetBytes(1024 * 1024)
 	var key [32]byte
-	var data [1024]byte
+	data := make([]byte, size)
+	rand.Read(data)
+
+	b.SetBytes(size)
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		h, _ := hash(key[:])
-		for j := 0; j < 1024; j++ {
-			h.Write(data[:])
-		}
+		h.Write(data)
 		h.Sum(nil)
 	}
 }
 
 func benchmarkHash(b *testing.B, hash func() hash.Hash) {
-	b.SetBytes(1024 * 1024)
-	var data [1024]byte
+	data := make([]byte, size)
+	rand.Read(data)
+
+	b.SetBytes(size)
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		h := hash()
-		for j := 0; j < 1024; j++ {
-			h.Write(data[:])
-		}
+		h.Write(data)
 		h.Sum(nil)
 	}
 }
@@ -58,7 +63,7 @@ func BenchmarkHighwayHash(b *testing.B) {
 }
 
 func BenchmarkSHA256_AVX512(b *testing.B) {
-	benchmarkAvx512(b, 1*1024*1024)
+	benchmarkAvx512(b, size)
 }
 
 func BenchmarkBlake2b(b *testing.B) {
@@ -99,6 +104,7 @@ func benchmarkAvx512(b *testing.B, size int) {
 
 	const tests = 16
 	body := make([]byte, size)
+	rand.Read(body)
 
 	b.SetBytes(int64(len(body) * tests))
 	b.ResetTimer()
