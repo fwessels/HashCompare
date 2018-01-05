@@ -276,7 +276,7 @@ func (h *HexHeap) Pop() interface{} {
 	return x
 }
 
-func main() {
+func permuteAlgorithm(algo string) {
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	var key [32]byte
@@ -287,14 +287,7 @@ func main() {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, '-', tabwriter.AlignRight|tabwriter.Debug)
 	fmt.Fprintln(w, "Permutations", "\t", "Zero bits", "\t", "Duration")
 
-	algo := ""
-	//algo = "blake2b"
-	//algo = "blake2b-256"
-	//algo = "poly1305"
-	//algo = "siphash"
-	algo = "highwayhash"
-	//algo = "highwayhash128"
-	//algo = "highwayhash64"
+	const honderFiftyMillionPermutations = 23
 	for shift := uint(8); shift < 16; shift++ {
 		permutations, zeroBits, elapsed := TestHashPermutations(key, 1<<shift, algo)
 		fmt.Printf("Permutations: %d -- zero bits: %d -- duration: %v (%s)\n", permutations, zeroBits, elapsed, algo)
@@ -303,4 +296,16 @@ func main() {
 	fmt.Println()
 	fmt.Println(algo)
 	w.Flush()
+}
+
+func main() {
+	
+	//algo = "blake2b"
+	//algo = "blake2b-256"
+	//algo = "poly1305"
+	//algo = "siphash"
+	permuteAlgorithm("highwayhash")
+	permuteAlgorithm("highwayhash128")
+	//algo = "highwayhash128"
+	//algo = "highwayhash64"
 }
